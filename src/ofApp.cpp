@@ -36,7 +36,7 @@ void ofApp::update(){
         if(sections[i].active == true){
             if(sections[i].width <= maxWidth) expand_sections.push_back(i);
         } else {
-             if(sections[i].width > defaultWidth) shrink_sections.push_back(i);
+            if(sections[i].width > defaultWidth) shrink_sections.push_back(i);
         }
     }
     
@@ -74,7 +74,7 @@ void ofApp::draw(){
     ofSetColor(255);
     ofDrawBitmapString(ofToString("press 1-9 keys to expand those sections"), 10, ofGetHeight() - 100);
     ofDrawBitmapString(ofToString("red == active age < 5 secs "), 10, ofGetHeight() - 80);
-
+    
     
 }
 
@@ -83,14 +83,14 @@ void ofApp::shrink(vector<int>shrink_sections, float total_shrink_amount)
     if(shrink_sections.size() <= 0) return;
     ofLog()<<"---------shrink.  shrink_sections.size() "<<shrink_sections.size()<<" total_shrink_amount "<<total_shrink_amount;
     
-     for(int i = 0; i < shrink_sections.size(); i++){
-         ofLog()<<"shrink_sections[i] "<<shrink_sections[i]<<" width "<<sections[shrink_sections[i]].width;
-     }
+    for(int i = 0; i < shrink_sections.size(); i++){
+        ofLog()<<"shrink_sections[i] "<<shrink_sections[i]<<" width "<<sections[shrink_sections[i]].width;
+    }
     // Uniformly shrink areas to accommodate the growth.
     bool changed = true;
     float amount_unshrinked = total_shrink_amount;
     float epsilon = .1;
-//    float minimum_width = 2;
+    //    float minimum_width = 2;
     
     while(amount_unshrinked >= epsilon && changed == true) //epsilon == around 2.
     {
@@ -100,39 +100,44 @@ void ofApp::shrink(vector<int>shrink_sections, float total_shrink_amount)
         float total_available_width = 0;
         for(int i = 0; i < sections.size(); i++)
         {
+            ofLog()<<i<<" sections[i].width < defaultWidth "<<sections[i].width <<" default "<< defaultWidth;
             if ( sections[i].active == false && sections[i].width < defaultWidth){
                 total_available_width += sections[i].width;
             }
         }
-        ofLog()<<"total_available_width "<<total_available_width<<" - total_shrink_amount "<<total_shrink_amount;
-
+        //        ofLog()<<"total_available_width "<<total_available_width<<" - total_shrink_amount "<<total_shrink_amount;
+        
         
         float desired_width = total_available_width + total_shrink_amount;
-        ofLog()<<"desired_width "<<desired_width;
+        //        ofLog()<<"desired_width "<<desired_width;
         
         float percentage_change = desired_width/float(total_available_width);
-        ofLog()<<"percentage_change "<<percentage_change;
-
+        //        ofLog()<<"percentage_change "<<percentage_change;
+        
         for(int i = 0; i < sections.size(); i++)
         {
             if(sections[i].active == false && sections[i].width < defaultWidth){
                 //                ofLog()<<i<<" sections[i].width "<<sections[i].width;
                 float original_width = sections[i].width;
                 float new_width = sections[i].width*percentage_change;
-                
-                new_width = MAX(new_width, defaultWidth);
+                //                ofLog()<<"sections[i].width*percentage_change "<<sections[i].width*percentage_change;
+                new_width = MIN(new_width, defaultWidth);
                 
                 sections[i].width = new_width;
-                amount_unshrinked -= original_width - new_width;
+                //                ofLog()<<"new_width "<<new_width;
+                
+                amount_unshrinked -= (new_width - original_width) ;
                 changed = true;
             }
         }
+        
+        //        ofLog()<<"amount_unshrinked "<<amount_unshrinked;
         
     }//end while
     
     ofLog()<<"amount_unshrinked "<<amount_unshrinked;
     
-//    total_shrink_amount -= amount_unshrinked;
+    //    total_shrink_amount -= amount_unshrinked;
     
     ofLog()<<"total_shrink_amount "<<total_shrink_amount;
     
@@ -202,7 +207,7 @@ void ofApp::expand(vector<int>expand_sections, float total_expansion_amount)
     }//end while
     
     ofLog()<<"amount_unexpanded "<<amount_unexpanded;
-    total_expansion_amount -= amount_unexpanded; //incase we coould not fully shrink other sections 
+    total_expansion_amount -= amount_unexpanded; //incase we coould not fully shrink other sections
     
     ofLog()<<"total_expansion_amount "<<total_expansion_amount;
     
